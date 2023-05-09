@@ -8,8 +8,44 @@ datasource db {
 }
 
 model User {
-  id    Int    @id @default(autoincrement())
-  login String @unique
+  id           Int        @id @default(autoincrement())
+  login        String     @unique
+  activeRoomId Int?       @map("active_room_id")
+  activeRoom   Room?      @relation(fields: [activeRoomId], references: [id])
+  gameMoves    GameMove[]
 
   @@map("users")
+}
+
+model Room {
+  id    Int    @id @default(autoincrement())
+  name  String
+  users User[]
+  games Game[]
+
+  @@map("rooms")
+}
+
+model Game {
+  id        Int        @id @default(autoincrement())
+  roomId    Int        @map("room_id")
+  room      Room       @relation(fields: [roomId], references: [id])
+  finished  Boolean    @default(false)
+  createdAt DateTime   @default(now()) @map("created_at")
+  gameMoves GameMove[]
+
+  @@map("games")
+}
+
+model GameMove {
+  id        Int      @id @default(autoincrement())
+  gameId    Int      @map("game_id")
+  game      Game     @relation(fields: [gameId], references: [id])
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  result    Int      @db.SmallInt
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([gameId, userId], name: "game_moves_game_id_user_id_unique_key")
+  @@map("game_moves")
 }

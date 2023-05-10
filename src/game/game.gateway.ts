@@ -56,6 +56,9 @@ export class GameGateway
   }
 
   async handleDisconnect(client: Socket): Promise<void> {
+    if (!client.data.user) {
+      return;
+    }
     const { id: userId, activeRoomId } = client.data.user as User;
     await this.gameService.unsubscribeFromUserEvents(client, userId);
     if (activeRoomId) {
